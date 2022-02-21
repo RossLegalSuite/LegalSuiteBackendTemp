@@ -19,8 +19,6 @@
         "league/flysystem-cached-adapter": "~1.0",
         "maatwebsite/excel": "^3.1",
         "mikehaertl/php-pdftk": "^0.8.0",
-        "php-imap/php-imap": "^4.1",
-        "php-mime-mail-parser/php-mime-mail-parser": "^7.0",
         "phpoffice/phpword": "^0.17.0",
         "pragmarx/version": "^1.2",
         "yajra/laravel-datatables-oracle": "~9.0"

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Arr;
 use Illuminate\Mail\Mailer;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Swift_Mailer;

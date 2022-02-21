@@ -274,7 +274,7 @@ class Utils
     public static function LogSqlQuery($query)
     {
         if (config('app.debug')) {
-            $sqlQuery = str_replace_array('?', $query->getBindings(), $query->toSql());
+            $sqlQuery = Str::replaceArray('?', $query->getBindings(), $query->toSql());
             logger($sqlQuery);
         }
     }

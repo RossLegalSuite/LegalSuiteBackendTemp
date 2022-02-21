@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Arr;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -18,14 +19,14 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('user.mailer', function ($app, $parameters) {
-            $smtp_host = array_get($parameters, 'smtp_host');
-            $smtp_port = array_get($parameters, 'smtp_port');
-            $smtp_username = array_get($parameters, 'smtp_username');
-            $smtp_password = array_get($parameters, 'smtp_password');
-            $smtp_encryption = array_get($parameters, 'smtp_encryption');
+            $smtp_host = Arr::get($parameters, 'smtp_host');
+            $smtp_port = Arr::get($parameters, 'smtp_port');
+            $smtp_username = Arr::get($parameters, 'smtp_username');
+            $smtp_password = Arr::get($parameters, 'smtp_password');
+            $smtp_encryption = Arr::get($parameters, 'smtp_encryption');
 
-            $from_email = array_get($parameters, 'from_email');
-            $from_name = array_get($parameters, 'from_name');
+            $from_email = Arr::get($parameters, 'from_email');
+            $from_name = Arr::get($parameters, 'from_name');
 
             $from_email = $parameters['from_email'];
             $from_name = $parameters['from_name'];

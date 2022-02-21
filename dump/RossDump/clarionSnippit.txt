@@ -1,0 +1,229 @@
+ Case MAT:InvoiceFeeOption
+ Of 0
+   LOC:FeeOption          = 0 ! Itemised
+   LOC:FeeSeparatorOption = 0
+   LOC:FeeSummarizeFlag   = 0
+ Of 1
+   LOC:FeeOption          = 1 ! Essay Style
+   LOC:FeeSeparatorOption = 0 ! Semicolon
+   LOC:FeeSummarizeFlag   = 0
+ Of 2
+   LOC:FeeOption          = 1 ! Essay Style
+   LOC:FeeSeparatorOption = 1 ! Cr/Lf
+   LOC:FeeSummarizeFlag   = 0
+ Of 3
+   LOC:FeeOption          = 1 ! Essay Style
+   LOC:FeeSeparatorOption = 0 ! Semicolon
+   LOC:FeeSummarizeFlag   = 1 ! Summarise
+ Of 4
+   LOC:FeeOption          = 1 ! Essay Style
+   LOC:FeeSeparatorOption = 1 ! Cr/Lf
+   LOC:FeeSummarizeFlag   = 1 ! Summarise
+ Of 5 ! Itemised Summary
+   LOC:FeeOption          = 0 ! Itemised
+   LOC:FeeSeparatorOption = 0 
+   LOC:FeeSummarizeFlag   = 1 ! Summarise
+ Of 6 ! Total Only
+   LOC:FeeOption          = 2 ! Totals Only
+   LOC:FeeSeparatorOption = 0
+   LOC:FeeSummarizeFlag   = 0 
+ .
+
+ Case MAT:InvoiceDisbursementOption
+ Of 0                                                                                                           
+   LOC:DisbursementOption           = 0 ! Itemised
+   LOC:DisbursementSeparatorOption  = 0
+   LOC:DisbursementSummarizeFlag    = 0
+ Of 1
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 0 ! Semicolon
+   LOC:DisbursementSummarizeFlag    = 0
+ Of 2
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 1 ! Cr/Lf
+   LOC:DisbursementSummarizeFlag    = 0
+ Of 3
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 0 ! Semicolon
+   LOC:DisbursementSummarizeFlag    = 1 ! Summarise
+ Of 4
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 1 ! Cr/Lf
+   LOC:DisbursementSummarizeFlag    = 1 ! Summarise
+ Of 5 ! Itemised Summary
+   LOC:DisbursementOption           = 0 ! Itemised
+   LOC:DisbursementSeparatorOption  = 0
+   LOC:DisbursementSummarizeFlag    = 1 ! Summarise
+ Of 6 ! Total Only
+   LOC:DisbursementOption           = 2 ! Totals Only
+   LOC:DisbursementSeparatorOption  = 0
+   LOC:DisbursementSummarizeFlag    = 0
+
+
+! Itemise Creditors Disbursements ----------------------------------------------
+
+ Of 7 
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 0 ! Semicolon
+   LOC:DisbursementSummarizeFlag    = 0
+   LOC:ItemiseCreditorDisbursementOption = 1
+ Of 8
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 1 ! Cr/Lf
+   LOC:DisbursementSummarizeFlag    = 0
+   LOC:ItemiseCreditorDisbursementOption = 1
+ Of 9
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 0 ! Semicolon
+   LOC:DisbursementSummarizeFlag    = 1 ! Summarise
+   LOC:ItemiseCreditorDisbursementOption = 1
+ Of 10
+   LOC:DisbursementOption           = 1 ! Essay Style
+   LOC:DisbursementSeparatorOption  = 1 ! Cr/Lf
+   LOC:DisbursementSummarizeFlag    = 1 ! Summarise
+   LOC:ItemiseCreditorDisbursementOption = 1
+
+ Of 11 ! Total both Business and Creditor Disbursements
+   LOC:DisbursementOption           = 2 ! 
+   LOC:DisbursementSeparatorOption  = 0
+   LOC:DisbursementSummarizeFlag    = 0
+   LOC:SeparateCreditorDisbursementOption = 1
+
+
+ Of 12 ! Total both Business Disbursements but itemise Creditor Disbursements
+   LOC:DisbursementOption           = 3
+   LOC:DisbursementSeparatorOption  = 0
+   LOC:DisbursementSummarizeFlag    = 0
+   LOC:SeparateCreditorDisbursementOption = 1
+
+ .
+
+
+
+ If LOC:FeeOption = 2
+     MAT:InvoiceFeeOption = 6
+   ElsIf LOC:FeeOption = 1 and LOC:FeeSeparatorOption = 0 and LOC:FeeSummarizeFlag = 0
+     MAT:InvoiceFeeOption = 1
+   ElsIf LOC:FeeOption = 1 and LOC:FeeSeparatorOption = 1 and LOC:FeeSummarizeFlag = 0
+     MAT:InvoiceFeeOption = 2
+   ElsIf LOC:FeeOption = 1 and LOC:FeeSeparatorOption = 0 and LOC:FeeSummarizeFlag = 1
+     MAT:InvoiceFeeOption = 3
+   ElsIf LOC:FeeOption = 1 and LOC:FeeSeparatorOption = 1 and LOC:FeeSummarizeFlag = 1
+     MAT:InvoiceFeeOption = 4
+   ElsIf LOC:FeeOption = 0 and LOC:FeeSummarizeFlag = 1
+     MAT:InvoiceFeeOption = 5
+   Else
+     MAT:InvoiceFeeOption = 0
+   .
+   If LOC:DisbursementOption = 2 ! Total Business and Creditor Disbursements
+
+     IF LOC:SeparateCreditorDisbursementOption
+        MAT:InvoiceDisbursementOption = 11
+     ELSE
+        MAT:InvoiceDisbursementOption = 6
+     END
+
+   ELSIF LOC:DisbursementOption = 3 ! Total Business but itmeise Creditor Disbursements
+
+        MAT:InvoiceDisbursementOption = 12
+
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 0 and LOC:DisbursementSummarizeFlag = 0 and LOC:ItemiseCreditorDisbursementOption = 0
+     MAT:InvoiceDisbursementOption = 1
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 1 and LOC:DisbursementSummarizeFlag = 0 and LOC:ItemiseCreditorDisbursementOption = 0
+     MAT:InvoiceDisbursementOption = 2
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 0 and LOC:DisbursementSummarizeFlag = 1 and LOC:ItemiseCreditorDisbursementOption = 0
+     MAT:InvoiceDisbursementOption = 3
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 1 and LOC:DisbursementSummarizeFlag = 1 and LOC:ItemiseCreditorDisbursementOption = 0
+     MAT:InvoiceDisbursementOption = 4
+   ElsIf LOC:DisbursementOption = 0 and LOC:DisbursementSummarizeFlag = 1
+     MAT:InvoiceDisbursementOption = 5
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 0 and LOC:DisbursementSummarizeFlag = 0 and LOC:ItemiseCreditorDisbursementOption = 1
+     MAT:InvoiceDisbursementOption = 7
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 1 and LOC:DisbursementSummarizeFlag = 0 and LOC:ItemiseCreditorDisbursementOption = 1
+     MAT:InvoiceDisbursementOption = 8
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 0 and LOC:DisbursementSummarizeFlag = 1 and LOC:ItemiseCreditorDisbursementOption = 1
+     MAT:InvoiceDisbursementOption = 9
+   ElsIf LOC:DisbursementOption = 1 and LOC:DisbursementSeparatorOption = 1 and LOC:DisbursementSummarizeFlag = 1 and LOC:ItemiseCreditorDisbursementOption = 1
+     MAT:InvoiceDisbursementOption = 10
+   Else
+     MAT:InvoiceDisbursementOption = 0
+   .
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  If MAT:InvoiceFormat
+    LOC:OverrideInvoiceFormat = True
+    Case MAT:InvoiceFormat
+    Of 1 ! Old Onvoice
+      LOC:FormatOption = 0
+    Of 2 ! New Format
+      LOC:FormatOption = 0
+      LOC:SeparateInvoiceStatementFlag = True
+    Of 3 ! Separate Pages
+      LOC:FormatOption = 0
+      LOC:SeparateInvoiceStatementFlag = True
+      LOC:SeparatePagesFlag = True
+    Of 4 ! Invoices Must Show as Statements
+      LOC:FormatOption = 1
+    Of 5
+      LOC:FormatOption = 1
+      LOC:ShowVATFlag = True
+    .
+  Else
+    LOC:OverrideInvoiceFormat = False
+    Case CTL:InvoiceFormat
+    Of 1 ! Old Onvoice
+      LOC:FormatOption = 0
+    Of 2 ! New Format
+      LOC:FormatOption = 0
+      LOC:SeparateInvoiceStatementFlag = True
+    Of 3 ! Separate Pages
+      LOC:FormatOption = 0
+      LOC:SeparateInvoiceStatementFlag = True
+      LOC:SeparatePagesFlag = True
+    Of 4 ! Invoices Must Show as Statements
+      LOC:FormatOption = 1
+    Of 5
+      LOC:FormatOption = 1
+      LOC:ShowVATFlag = True
+    .
+
+
+
+
+    ///////////
+
+    If LOC:OverrideInvoiceFormat
+      ?LOC:FormatOption{PROP:Disable} = False
+      Case LOC:FormatOption
+      Of 0
+        ?LOC:SeparateInvoiceStatementFlag{PROP:Disable} = False
+        If LOC:SeparateInvoiceStatementFlag 
+          ?LOC:SeparatePagesFlag{PROP:Disable} = False
+          If LOC:SeparatePagesFlag
+            MAT:InvoiceFormat = 3
+          Else
+            MAT:InvoiceFormat = 2
+          .
+        Else
+          MAT:InvoiceFormat = 1
+        .
+      Of 1
+        ?LOC:ShowVatFlag{PROP:Disable} = False
+        If LOC:ShowVATFlag
+          MAT:InvoiceFormat = 5
+         Else
+          MAT:InvoiceFormat = 4
+        .
+      .
+    Else
+      ?LOC:FormatOption{PROP:Disable} = True
+      MAT:InvoiceFormat = 0
+    .

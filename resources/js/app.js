@@ -40,20 +40,20 @@ import 'jquery-ui/themes/base/resizable.css';
 
 
 // https://docxtemplater.readthedocs.io/en/latest/faq.html#docxtemplater-in-a-vuejs-project
-import Docxtemplater from "docxtemplater";
+// import Docxtemplater from "docxtemplater";
 
-import PizZip from "pizzip";
-import PizZipUtils from "pizzip/utils/index.js";
-import InspectModule from "docxtemplater/js/inspect-module";
+// import PizZip from "pizzip";
+// import PizZipUtils from "pizzip/utils/index.js";
+// import InspectModule from "docxtemplater/js/inspect-module";
 
 
 //https://docxtemplater.readthedocs.io/en/latest/angular_parse.html
-import expressions from 'angular-expressions';
+// import expressions from 'angular-expressions';
 import assign from "lodash/assign";
 
 
 //Required for the Excel HTML5 export button - Deprecate and remove from package.json
-import JSZip from "jszip";
+// import JSZip from "jszip";
 
 // ColorPicker: https://huebee.buzz/
 // window.Huebee = require('huebee');

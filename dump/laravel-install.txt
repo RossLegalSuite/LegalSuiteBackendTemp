@@ -51,7 +51,7 @@ OR...if using multiple databases:
 php artisan migrate --path=database/migrations_backend
 
 10) Npm Run Production
-$ npm run prod
+$ npm run build
 
 
 
@@ -104,12 +104,12 @@ Package.json example:
 {
     "private": true,
     "scripts": {
-        "dev": "npm run development",
+        "dev": "npm run dev",
         "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-        "watch": "npm run development -- --watch",
-        "watch-poll": "npm run watch -- --watch-poll",
+        "watch": "npm run dev -- --watch",
+        "watch-poll": "npm run dev -- --watch-poll",
         "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
-        "prod": "npm run production",
+        "prod": "npm run build",
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "devDependencies": {

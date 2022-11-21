@@ -146,13 +146,23 @@ class Utils
 
             $curl = curl_init();
 
+            //https://stackoverflow.com/questions/4344528/curlopt-postfields-has-a-length-or-size-limit
+
+            //CURLOPT_URL => config('api.url').$apiUrl,
+            //CURLOPT_URL => $serverUrl . $apiUrl,
+            
+            // logger("config(api.url)",[config('api.url').$apiUrl]);
+            // logger('$serverUrl',[$serverUrl . $apiUrl]);
+            // logger('Utils.php SetCurlParams session[serverUrl]',[session('serverUrl'). $apiUrl]);
+            
             curl_setopt_array($curl, [
-                CURLOPT_URL => config('api.url').$apiUrl,
+                CURLOPT_URL => session('serverUrl') . $apiUrl,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_MAXREDIRS => 10,
                 CURLOPT_TIMEOUT => 30000,
+                CURLOPT_CONNECTTIMEOUT => 30000,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => $customRequest,
@@ -160,6 +170,7 @@ class Utils
                 CURLOPT_HTTPHEADER => [
                     'Authorization: Bearer '.session('api_token'),
                     'Content-Type: application/x-www-form-urlencoded',
+                    'Expect: 100-continue',
                 ],
             ]);
 
@@ -204,106 +215,86 @@ class Utils
         });
     }
 
-    public static function DB()
-    {
-        return DB::connection('user');
-    }
+    // public static function DB()
+    // {
 
-    public static function SetConnection($companyCode)
-    {
-        if (! defined('STDIN')) {
-            define('STDIN', fopen('php://stdin', 'r'));
-        }
+    //     return DB::connection('user');
 
-        // 18 Oct 2020
-        // Problem: env('DB_HOST') is null in General.php
-        // logger("env('DB_HOST')",[env('DB_HOST')]);
-        // Solution: https://stackoverflow.com/questions/34263107/get-environment-value-in-controller
-        // Added values.php in the config folder
+    // }
 
-        $dbHost = Config::get('values.dbhost');
+    // public static function SetConnection($companyCode)
+    // {
 
-        $db = strtolower(preg_replace('/[^a-zA-Z0-9-_\.]/', '', $companyCode));
-        $user = $db.'_user';
-        $password = $db.'_1024';
+    //     if(! defined('STDIN')) define('STDIN', fopen("php://stdin","r"));
 
-        config(['database.default' => 'user']);
+    //     // 18 Oct 2020
+    //     // Problem: env('DB_HOST') is null in General.php
+    //     // logger("env('DB_HOST')",[env('DB_HOST')]);
+    //     // Solution: https://stackoverflow.com/questions/34263107/get-environment-value-in-controller
+    //     // Added values.php in the config folder
 
-        config(['database.connections.user' => [
-            'driver' =>     'mysql',
-            'host' =>       $dbHost,
-            'database' =>   $db,
-            'port' =>       '3306',
-            'username' =>   $user,
-            'password' =>   $password,
-            'charset' =>    'utf8mb4',
-            'collation' =>  'utf8mb4_unicode_ci',
-            'prefix' =>     '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-        ]]);
+    //     $dbHost = Config::get('values.dbhost');
 
-        //logger("User Connection')",config('database.connections.user'));
+    //     $db = strtolower(preg_replace('/[^a-zA-Z0-9-_\.]/','', $companyCode));
+    //     $user = $db . '_user';
+    //     $password = $db . '_1024';
 
-        $adminUser = $db.'_admin';
-        $adminPassword = 'Bacon1024!!';
+    //     config(['database.default' => 'user']);
 
-        // **********************************************
-        //Create an admin connection to do the migrations
-        // **********************************************
+    //     config(['database.connections.user' =>
+    //     [
+    //         'driver' =>     'mysql',
+    //         "host" =>       $dbHost,
+    //         "database" =>   $db,
+    //         "port" =>       '3306',
+    //         "username" =>   $user,
+    //         "password" =>   $password,
+    //         'charset' =>    'utf8mb4',
+    //         'collation' =>  'utf8mb4_unicode_ci',
+    //         'prefix' =>     '',
+    //         'prefix_indexes' => true,
+    //         'strict' => true,
+    //         'engine' => null,
+    //     ]]);
 
-        config(['database.connections.admin' => [
-            'driver' =>     'mysql',
-            'host' =>       $dbHost,
-            'database' =>   $db,
-            'port' =>       '3306',
-            'username' =>   $adminUser,
-            'password' =>   $adminPassword,
-            'charset' =>    'utf8mb4',
-            'collation' =>  'utf8mb4_unicode_ci',
-            'prefix' =>     '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-        ]]);
+    //     //logger("User Connection')",config('database.connections.user'));
 
-        //logger("admin Connection')",config('database.connections.admin'));
-    }
+    //     $adminUser = $db . '_admin';
+    //     $adminPassword = 'Bacon1024!!';
 
-    public static function LogSqlQuery($query)
-    {
-        if (config('app.debug')) {
-            $sqlQuery = str_replace_array('?', $query->getBindings(), $query->toSql());
-            logger($sqlQuery);
-        }
-    }
+    //     // **********************************************
+    //     //Create an admin connection to do the migrations
+    //     // **********************************************
 
-    public static function getDisbursementsControlAccount($disbursementsControlAccountId, $disbursementId, $disbursementDescription)
-    {
-        $parentAccountId = $disbursementsControlAccountId;
+    //     config(['database.connections.admin' =>
+    //     [
+    //         'driver' =>     'mysql',
+    //         "host" =>       $dbHost,
+    //         "database" =>   $db,
+    //         "port" =>       '3306',
+    //         "username" =>   $adminUser,
+    //         "password" =>   $adminPassword,
+    //         'charset' =>    'utf8mb4',
+    //         'collation' =>  'utf8mb4_unicode_ci',
+    //         'prefix' =>     '',
+    //         'prefix_indexes' => true,
+    //         'strict' => true,
+    //         'engine' => null,
+    //     ]]);
 
-        $parentAccount = \App\Models\Account::findOrFail($parentAccountId);
+    //     //logger("admin Connection')",config('database.connections.admin'));
 
-        $disbursementChildAccount = \App\Models\Account::where('parentId', $disbursementsControlAccountId)
-        ->where('disbursementId', $disbursementId)
-        ->first();
+    // }
 
-        if ($disbursementChildAccount) {
-            return $disbursementChildAccount;
-        } else {
-            return \App\Models\Account::create([
-                'parentId' => $parentAccount->id,
-                'code' => $parentAccount->code.'-'.self::padNumber($disbursementId),
-                'disbursementId' => $disbursementId,
-                'description' => $disbursementDescription,
-                'category' => $parentAccount->category,
-                'type' => $parentAccount->type,
-                'taxRateId' => $parentAccount->taxRateId,
-                'notes' => 'Prepaid expense recoverable from the Client',
-            ]);
-        }
-    }
+    // public static function LogSqlQuery($query)
+    // {
+
+    //     if (config('app.debug')) {
+
+    //         $sqlQuery = str_replace_array('?', $query->getBindings(), $query->toSql());
+    //         logger($sqlQuery);
+    //     }
+    // }
 
     public static function padNumber($number)
     {
@@ -319,38 +310,6 @@ class Utils
         $description = preg_replace('/[^a-zA-Z0-9]/', '', $description);
 
         return Str::camel($description);
-    }
-
-    public static function generateCode_Deprecated($table, $description)
-    {
-        $description = preg_replace('/[^a-zA-Z0-9]/', '', $description);
-
-        while (strlen($description) < 4) {
-            $description = $description.'_';
-        }
-
-        $code = strtoupper(substr($description, 0, 4));
-
-        $counter = DB::table($table)->where('code', 'like', $code.'%')->count();
-
-        if ($counter) {
-
-            //$counter++;
-
-            while ($counter <= 5000) {
-                $existingRecord = DB::table($table)->where('code', $code.$counter)->first();
-
-                if (! $existingRecord) {
-                    break;
-                }
-
-                $counter++;
-            }
-
-            return $code.$counter;
-        } else {
-            return $code;
-        }
     }
 
     public static function isWritable($path)

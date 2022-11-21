@@ -44,14 +44,12 @@ class EmailMessage extends Mailable
         $message->replyTo(session('employeeEmail'), session('companyName'));
 
         $message->to($this->toAddress);
+
         $message->cc($this->ccAddress);
         $message->bcc($this->bccAddress);
 
         foreach ($this->emailAttachments as $attachment) {
-            $message->attach($attachment);
-            // $message->attachFromStorageDisk('uploads',$attachment, null, [
-            //     'mime' => 'application/pdf'
-            // ]);
+            $message->attachFromStorageDisk(session('region'), $attachment);
         }
 
         return $message;

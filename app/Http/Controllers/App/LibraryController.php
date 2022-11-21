@@ -28,16 +28,14 @@ class LibraryController extends Controller
 
         try {
             if (isset($request->recordid)) {
-                $apiUrl = "/library/{$request->recordid}";
-                $customRequest = 'PUT';
+                $apiUrl = '/library/update';
             } else {
-                $apiUrl = '/library';
-                $customRequest = 'POST';
+                $apiUrl = '/library/store';
             }
 
             $postFields = $request->queryString;
 
-            $response = Utils::SetCurlParams($apiUrl, $customRequest, $postFields);
+            $response = Utils::SetCurlParams($apiUrl, 'POST', $postFields);
 
             return json_encode($response);
         } catch (\Exception $e) {

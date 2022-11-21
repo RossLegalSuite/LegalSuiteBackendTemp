@@ -9,6 +9,56 @@ use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
+    private function remoteFileExists($url)
+    {
+
+        //https://stackoverflow.com/questions/981954/how-can-one-check-to-see-if-a-remote-file-exists-using-php
+        $curl = curl_init($url);
+
+        //don't fetch the actual page, you only want to check the connection is ok
+        curl_setopt($curl, CURLOPT_NOBODY, true);
+
+        //do request
+        $result = curl_exec($curl);
+
+        $ret = false;
+
+        //if request did not fail
+        if ($result !== false) {
+            //if request was ok, check response code
+            $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            if ($statusCode == 200) {
+                $ret = true;
+            }
+        }
+
+        curl_close($curl);
+
+        return $ret;
+    }
+
+    public function checkIfRemoteFileExists(Request $request)
+    {
+        $returnData['result'] = $this->remoteFileExists(str_replace(' ', '%20', $request->url));
+
+        // $result = $this->remoteFileExists( str_replace(' ', '%20', $request->url) );
+
+        // $returnData['result'] = $result;
+
+        // if ( $result ) {
+
+        //     $returnData['url'] = str_replace(' ', '%20', $request->url);
+
+        // } else {
+
+        //     $returnData['url'] = '';
+
+        // }
+
+        return json_encode($returnData);
+    }
+
     public function exists(Request $request)
     {
         $returnData = new \stdClass();
@@ -48,6 +98,7 @@ class FileController extends Controller
 
     public function uploadFile(Request $request)
     {
+       
         $returnData = new \stdClass();
 
         try {
@@ -99,7 +150,7 @@ class FileController extends Controller
 
         $returnData->fileName = $request->fileName;
 
-        $returnData->path = strtolower(session('companyCode').'/'.session('employeeId').'/'.$request->folder);
+        $returnData->path = strtolower('LegalSuiteBackend/'. $request->firmcode.'/'.$request->folder);
 
         $returnData->url = $cloudStorage->url($returnData->path.'/'.$returnData->fileName);
 
@@ -107,6 +158,7 @@ class FileController extends Controller
             $cloudStorage->putFileAs($returnData->path, $request->file, $returnData->fileName, 'public');
 
             return json_encode($returnData);
+
         } catch (\Exception $e) {
             $returnData->error = $e->getMessage();
 

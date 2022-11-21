@@ -17,7 +17,7 @@ class LoggedIn
             }
         }
 
-        Utils::SetConnection(session('companyCode'));
+        //Utils::SetConnection(session('companyCode'));
 
         return $next($request);
     }

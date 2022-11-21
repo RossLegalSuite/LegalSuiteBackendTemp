@@ -11,26 +11,30 @@ use mikehaertl\pdftk\Pdf;
 // Note: Pdftk binary must be installed and in the web server path
 // See: https://www.pdflabs.com/docs/install-pdftk-on-redhat-or-centos/
 
+/***************************
+Need these settings in the php.ini
+
+upload_max_filesize = 64M
+post_max_size = 64M
+max_execution_time = 300
+memory_limit = 1024M
+
+****************************/
+
 class PdfController extends Controller
 {
     private function generateHtml($html)
     {
-
-        // Fix bug in SnappyPdf::loadHTML - an <hr> in the Html causes images to not render correctly (for some strange reason)
-        $html = str_replace('<hr>', '<div style="border: 1px solid darkgrey; margin: 5px 0px"></div>', $html);
-
-        $url = config('cloud.cdnUrl');
+        $css = file_get_contents(base_path().'/public/css/program.css');
 
         return <<<EOT
         <!DOCTYPE html>
         <html lang="en" class="no-js">
-        <head>
-            <meta charset="utf-8">
-            <link href="$url/program.css" rel="stylesheet">
-        </head>
-        <body style="background-color: white">
-        $html
-        </body>
+            <head>
+                <meta charset="utf-8">
+                <style>$css</style>
+            </head>
+            <body style="background-color: white">$html</body>
         </html>        
 EOT;
     }
@@ -40,7 +44,12 @@ EOT;
         try {
             $returnData = new \stdClass();
 
-            $relativePath = strtolower(session('companyCode')).'/'.session('employeeId').'/'.$request->folder;
+            if (null !== session('partyLoggedInFlag') && null !== session('partyMatterPrefix')) {
+                $relativePath = strtolower(session('companyCode')).'/'.session('partyMatterPrefix').'/'.$request->folder;
+            } else {
+                $relativePath = strtolower(session('companyCode')).'/'.session('employeeId').'/'.$request->folder;
+            }
+
             $realPath = storage_path('app/public').'/'.$relativePath;
 
             $cloudStorage = Storage::disk(session('region'));
@@ -48,14 +57,13 @@ EOT;
 
             $saveAs = $realPath.'/'.$request->fileName;
 
-            /*Need these php.ini settings
-            upload_max_filesize = 64M
-            post_max_size = 64M
-            max_execution_time = 300*/
-
+            // Increase timeout for large documents
             SnappyPdf::setTimeOut(300);
 
-            $pdf = SnappyPdf::loadHTML($this->generateHtml($request->bodyHtml));
+            // Fix bug in SnappyPdf::loadHTML - an <hr> in the Html causes images to not render correctly (for some strange reason)
+            $html = str_replace('<hr>', '<div style="border: 1px solid darkgrey; margin: 5px 0px"></div>', $request->bodyHtml);
+
+            $pdf = SnappyPdf::loadHTML($this->generateHtml($html));
 
             $pdf->setPaper($request->paperSize, $request->orientation);
 
@@ -89,7 +97,7 @@ EOT;
                 $pdfToolkit->allow($request->allow);
 
                 if (! $pdfToolkit->saveAs($saveAs)) {
-                    $returnData->error = $pdfToolkit->getError();
+                    $returnData->errors = $pdfToolkit->getError();
                 }
             }
 
@@ -105,7 +113,7 @@ EOT;
 
             return json_encode($returnData);
         } catch (\Exception $e) {
-            $returnData->error = $e->getMessage();
+            $returnData->errors = $e->getMessage();
 
             return json_encode($returnData);
         }
@@ -113,11 +121,22 @@ EOT;
 
     public function combine(Request $request)
     {
+
+        /* THIS WORKS
+        use mikehaertl\pdftk\Pdf;
+        $pdf = new Pdf();
+        $pdf->addFile('C:\laragon\www\legalsuiteonline\storage\app\public\acme01\5\documents\Document1.pdf','AAA');
+        $pdf->addFile('C:\laragon\www\legalsuiteonline\storage\app\public\acme01\5\documents\Document2.pdf','BBB');
+        $pdf->addFile('C:\laragon\www\legalsuiteonline\storage\app\public\acme01\5\documents\Document3.pdf','CCCC');
+        $pdf->addFile('C:\laragon\www\legalsuiteonline\storage\app\public\acme01\5\documents\Document4.pdf','DDDDDDD');
+        $pdf->cat('AAA BBB CCCC DDDDDDD');
+        $pdf->getError();
+        $pdf->saveAs( 'C:\laragon\www\legalsuiteonline\storage\app\public\acme01\5\documents\CombinedDocument.pdf');
+        $pdf->getError();
+        */
+
         $returnData = new \stdClass();
-
-        $returnData->error = null;
-
-        $files = [];
+        $returnData->errors = null;
 
         $relativePath = strtolower(session('companyCode')).'/'.session('employeeId').'/'.$request->folder;
         $realPath = storage_path('app/public').'/'.$relativePath;
@@ -125,32 +144,33 @@ EOT;
         $cloudStorage = Storage::disk(session('region'));
         $localStorage = Storage::disk('public');
 
-        $counter = -1;
+        $counter = 0;
+        $handles = '';
 
-        foreach (json_decode($request->pdfFiles) as $file) {
+        $files = json_decode($request->pdfFiles);
+
+        $pdf = new Pdf();
+
+        foreach ($files as $file) {
             $counter++;
+            //$handle = $this->getHandle($counter);
+            $handle = $this::getColName($counter);
 
-            $handle = $this->getHandle($counter);
-
-            // Download a copy of the file to the local public storage directory (so pdftk can comine them)
+            // Download a copy of the file to the local public storage directory (so pdftk can combine them)
             $localStorage->put($relativePath.'/'.$file->fileName, $cloudStorage->get($file->path.'/'.$file->fileName));
 
-            // Add to the array of files to br combined
-            $files[$handle] = storage_path('app/public').'/'.$relativePath.'/'.$file->fileName;
+            $pdf->addFile(storage_path('app/public').'/'.$relativePath.'/'.$file->fileName, $handle);
+
+            $handles .= $handle.' ';
         }
 
-        $pdfToolkit = new Pdf($files);
-
-        // Cat (Concatenate) the PDF's
-        foreach ($files as $letter => $fileName) {
-            if (! $pdfToolkit->cat($letter)) {
-                $returnData->error = $pdfToolkit->getError();
-            }
+        if (! $pdf->cat(trim($handles))) {
+            $returnData->errors = $pdf->getError();
         }
 
-        if (! isset($returnData->error)) {
-            if (! $pdfToolkit->saveAs($realPath.'/'.$request->saveAs)) {
-                $returnData->error = $pdfToolkit->getError();
+        if (! isset($returnData->errors)) {
+            if (! $pdf->saveAs($realPath.'/'.$request->saveAs)) {
+                $returnData->errors = $pdf->getError();
             } else {
                 $cloudStorage->put($relativePath.'/'.$request->saveAs, $localStorage->get($relativePath.'/'.$request->saveAs), 'public');
 
@@ -170,32 +190,99 @@ EOT;
         return json_encode($returnData);
     }
 
-    private function getHandle($counter)
+    //https://stackoverflow.com/questions/25958518/how-to-list-from-a-to-z-in-php-and-then-on-to-aa-ab-ac-etc
+    public static $alpha = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+    public static function getColName($index)
     {
+        $index--;
+        $nAlphabets = 26;
+        $f = floor($index / pow($nAlphabets, 0)) % $nAlphabets;
+        $s = (floor($index / pow($nAlphabets, 1)) % $nAlphabets) - 1;
+        $t = (floor($index / pow($nAlphabets, 2)) % $nAlphabets) - 1;
+
+        $f = $f < 0 ? '' : self::$alpha[$f];
+        $s = $s < 0 ? '' : self::$alpha[$s];
+        $t = $t < 0 ? '' : self::$alpha[$t];
+
+        return trim("{$t}{$s}{$f}");
+    }
+
+    /*
+        private function generateHtml_Bootstrap_Cdn($html) {
+
+            return <<<EOT
+            <!DOCTYPE html>
+            <html lang="en" class="no-js">
+            <head>
+                <meta charset="utf-8">
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+            </head>
+            <body style="background-color: white">
+            $html
+            </body>
+            </html>
+    EOT;
+
+        }
+
+
+        private function generateHtml_Cloud_Css($html) {
+
+            //Using full program CSS
+
+            $url = config('cloud.cdnUrl');
+
+            return <<<EOT
+            <!DOCTYPE html>
+            <html lang="en" class="no-js">
+            <head>
+                <meta charset="utf-8">
+                <link href="$url/program.css" rel="stylesheet">
+            </head>
+            <body style="background-color: white">
+            $html
+            </body>
+            </html>
+    EOT;
+
+        }
+    */
+
+    /*private function getHandle($counter)
+    {
+
         $letters = range('A', 'Z'); //['A','B' ... 'Z']
         $returnData = '';
         $chunks = 0;
 
-        if ($counter <= 25) {
+        if ($counter <= 25 ) {
+
             $returnData = $letters[$counter];
+
         } else {
-            $chunks = intdiv($counter, 25) + 1;
 
-            $letter = ($counter % 25) - 1;
+            $chunks = intdiv($counter,25) + 1;
 
-            for ($i = 0; $i < $chunks; $i++) {
+            $letter =  ($counter % 25) - 1;
+
+            for ($i=0; $i < $chunks; $i++) {
+
                 $returnData .= $letters[$letter];
+
             }
+
         }
 
         return $returnData;
-    }
+
+    }*/
 
     // public function setPassword(Request $request)
     // {
 
     //     $returnData = new \stdClass();
-    //     $returnData->error = null;
+    //     $returnData->errors = null;
 
     //     $pdfToolkit = new Pdf($request->fileName);
 
@@ -204,7 +291,7 @@ EOT;
 
     //     if ( !$pdfToolkit->saveAs($request->fileName) ) {
 
-    //         $returnData->error = $pdfToolkit->getError();
+    //         $returnData->errors = $pdfToolkit->getError();
 
     //     }
 

@@ -1,3 +1,14 @@
+To Replace Column names with lowercase
+---------------------------------------
+E.G.
+"Employee.Name as EmployeeName",
+"Party.Name as PartyName",
+"Party.MatterPrefix as PartyMatterPrefix",
+
+Search: as (\w+)
+Replace: as \L$1
+
+
 Using hard returns and Tabs
 ---------------------------------------
 Search: \n(.*?)initFormData()

@@ -28,6 +28,55 @@ class EmailController extends Controller
         but you would probably use something like this: sudo apt install php-cli php-mailparse
     */
 
+    public function sendEmail(Request $request)
+    {
+
+            //https://laravel-news.com/allowing-users-to-send-email-with-their-own-smtp-settings-in-laravel
+
+        $returnData = new \stdClass();
+
+        try {
+            $configuration = [
+                'smtp_host'       => $request->smtpServer,
+                'smtp_port'       => $request->smtpPort,
+                'smtp_username'   => $request->smtpUserName,
+                'smtp_password'   => $request->smtpPassword,
+                'smtp_encryption' => $request->smtpEncryption,
+                'from_email'      => $request->email,
+                'from_name'       => $request->name,
+            ];
+
+            // $configuration = [
+            //     'smtp_host'    => 'smtp.bittex.co.za',
+            //     'smtp_port'    => '587',
+            //     'smtp_username'  => 'ettorney@bittex.co.za',
+            //     'smtp_password'  => 'Bacon1024!!',
+            //     'smtp_encryption'  => 'tls',
+
+            //     'from_email'    => 'admin@acme.co.za',
+            //     'from_name'    => 'admin',
+            // ];
+
+            $mailer = app()->makeWith('user.mailer', $configuration);
+
+            $mailer->send(new EmailMessage($request->to, $request->cc, $request->bcc, $request->subject, $request->body, $request->attachments));
+        } catch (\Exception $e) {
+            $returnData->error = 'An error was encountered trying to send a mail via the Email Server ('.$request->smtpServer.'). Error: '.$e->getMessage();
+
+            return json_encode($returnData);
+        } catch (JWTException $exception) {
+            $returnData->error = 'An error was encountered sending the email. Error: '.$exception->getMessage();
+
+            return json_encode($returnData);
+        }
+
+        if (count(Mail::failures()) > 0) {
+            $returnData->error = 'An error was encountered sending the email to ' + implode(' ', Mail::failures());
+        }
+
+        return json_encode($returnData);
+    }
+
     private function getConnection($request, $folderFlag = true)
     {
         $folder = $folderFlag ? $request->folder : '';
@@ -412,57 +461,6 @@ class EmailController extends Controller
         return json_encode($returnData);
     }
 
-    public function sendEmail(Request $request)
-    {
-
-        //https://laravel-news.com/allowing-users-to-send-email-with-their-own-smtp-settings-in-laravel
-
-        $returnData = new \stdClass();
-
-        try {
-            $configuration = [
-                'smtp_host'       => $request->smtpServer,
-                'smtp_port'       => $request->smtpPort,
-                'smtp_username'   => $request->smtpUserName,
-                'smtp_password'   => $request->smtpPassword,
-                'smtp_encryption' => $request->smtpEncryption,
-                'from_email'      => $request->email,
-                'from_name'       => $request->name,
-            ];
-
-            // $configuration = [
-            //     'smtp_host'    => 'smtp.bittex.co.za',
-            //     'smtp_port'    => '587',
-            //     'smtp_username'  => 'ettorney@bittex.co.za',
-            //     'smtp_password'  => 'Bacon1024!!',
-            //     'smtp_encryption'  => 'tls',
-
-            //     'from_email'    => 'admin@acme.co.za',
-            //     'from_name'    => 'admin',
-            // ];
-
-            //logger('$configuration',$configuration);
-
-            $mailer = app()->makeWith('user.mailer', $configuration);
-
-            $mailer->send(new EmailMessage($request->to, $request->cc, $request->bcc, $request->subject, $request->body, $request->attachments));
-        } catch (\Exception $e) {
-            $returnData->error = 'An error was encountered trying to access the Email Server ('.$request->smtpServer.'). Error: '.$e->getMessage();
-
-            return json_encode($returnData);
-        } catch (JWTException $exception) {
-            $returnData->error = 'An error was encountered sending the email. Error: '.$exception->getMessage();
-
-            return json_encode($returnData);
-        }
-
-        if (count(Mail::failures()) > 0) {
-            $returnData->error = 'An error was encountered sending the email to ' + implode(' ', Mail::failures());
-        }
-
-        return json_encode($returnData);
-    }
-
     public function testOutgoingServer(Request $request)
     {
         $returnData = new \stdClass();
@@ -480,7 +478,7 @@ class EmailController extends Controller
 
             $mailer = app()->makeWith('user.mailer', $configuration);
 
-            $mailer->send(new EmailMessage([$request->email], [], [], 'Test Email from Ettorney', '<p>Dear '.$request->name.'<p><p>This is a test email from Ettorney.<p><p>If you received this message, it means your email setup is working.<p><p>Regards<br><br><br><p><p>Ettorney<p>', []));
+            $mailer->send(new EmailMessage([$request->email], [], [], 'Test Email from LegalSuite Online', '<p>Dear '.$request->name.'<p><p>This is a test email from LegalSuite Online.<p><p>If you received this message, it means your email setup is working.<p><p>Regards<br><br><br><p><p>LegalSuite Online<p>', []));
         } catch (\Exception $e) {
             $returnData->error = 'An error was encountered trying to access the Email Server ('.$request->smtpServer.'). Error: '.$e->getMessage();
 

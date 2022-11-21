@@ -3,7 +3,8 @@ import axios from "axios";
 import VueRouter from 'vue-router';
 import Vuex from 'vuex';
 
-window.compiler = require('vue-template-compiler');
+import compiler from 'vue-template-compiler';
+window.compiler = compiler;
 
 //https://artemsky.github.io/vue-snotify/documentation/index.html
 import Snotify from 'vue-snotify';
@@ -39,34 +40,35 @@ import 'jquery-ui/themes/base/resizable.css';
 
 
 // https://docxtemplater.readthedocs.io/en/latest/faq.html#docxtemplater-in-a-vuejs-project
-//window.Docxtemplater = require("docxtemplater");
+import Docxtemplater from "docxtemplater";
 
-//window.PizZip = require("pizzip");
-//window.PizZipUtils = require("pizzip/utils/index.js");
-//window.InspectModule = require("docxtemplater/js/inspect-module");
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
+import InspectModule from "docxtemplater/js/inspect-module";
 
 
 //https://docxtemplater.readthedocs.io/en/latest/angular_parse.html
-//window.expressions = require('angular-expressions');
-//window.assign = require("lodash/assign");
+import expressions from 'angular-expressions';
+import assign from "lodash/assign";
 
 
 //Required for the Excel HTML5 export button - Deprecate and remove from package.json
-//window.JSZip = require("jszip");
+import JSZip from "jszip";
 
 // ColorPicker: https://huebee.buzz/
 // window.Huebee = require('huebee');
 // import "huebee/dist/huebee.min.css";
 
-require("datatables.net-bs4");
-require("datatables.net-select-bs4");
+import "datatables.net-bs4";
+import "datatables.net-select-bs4";
 // require("datatables.net-scroller-bs4");
 
 // import "datatables.net-bs4";
 // import "datatables.net-select-bs4";
 // import "datatables.net-scroller-bs4";
 
-window.moment = require("moment");
+import moment from "moment";
+window.moment = moment;
 
 window.Vue = require("vue").default;
 
@@ -339,10 +341,10 @@ Vue.config.productionTip = false;
 //Vue.config.devtools = false; // Removes "Download the Vue Devtools extension for a better development experience" from the console
 //Vue.config.performance = true; //See: https://vuejs.org/v2/api/#performance
 
-require('./bootstrap');
+import './bootstrap';
 
 //require("../../node_modules/bootstrap-select/dist/js/bootstrap-select");
-require("bootstrap-select/dist/js/bootstrap-select");
+import "bootstrap-select/dist/js/bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.css";
 
 import routes from './routes';

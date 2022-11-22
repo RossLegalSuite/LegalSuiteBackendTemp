@@ -2,8 +2,7 @@ import Snotify from 'vue-snotify';
 import 'vue-snotify/styles/material.css';
 
 
-import Vue from "vue";
-window.Vue = Vue;
+window.Vue = require("vue");
 
 Vue.use(Snotify, {
     toast: {
@@ -18,7 +17,7 @@ window.Popper = require('popper.js').default;
 
 window.$ = window.jQuery = require('jquery');
 
-import 'bootstrap';
+require('bootstrap');
 
 new Vue({
     el: '#app',

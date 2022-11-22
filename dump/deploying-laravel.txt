@@ -39,7 +39,7 @@ $ php artisan key:generate
 $ npm install
 
 10) Npm Run Production
-$ npm run build
+$ npm run prod
 
 If you get an error, try:
 rm -rf node_modules
@@ -103,7 +103,7 @@ php artisan config:cache
 # npm install
 
 # Build assets using Laravel Mix
-# npm run build
+# npm run prod
 
 # Turn off maintenance mode
 php artisan up
@@ -132,7 +132,7 @@ php artisan route:clear
 php artisan route:cache
 php artisan config:clear
 php artisan config:cache
-npm run build
+npm run prod
 
 
 Now you can use

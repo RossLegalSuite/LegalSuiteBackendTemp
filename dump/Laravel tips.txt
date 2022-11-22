@@ -163,7 +163,7 @@ To compile components:
 
 or...
 
->npm run dev (Or.. >npm run dev-poll)
+>npm run watch (Or.. >npm run watch-poll)
 
 ----------------------------------------------
 

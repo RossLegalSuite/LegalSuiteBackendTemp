@@ -1,5 +1,4 @@
-import _ from 'lodash';
-window._ = _;
+window._ = require('lodash');
 
 try {
 
@@ -15,8 +14,7 @@ try {
 
 }
 
-import axios from 'axios';
-window.axios = axios;
+window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
